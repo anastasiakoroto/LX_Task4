@@ -1,0 +1,30 @@
+<query_2>
+    <goal>Get top-5 rooms where students have the youngest average age</goal>
+    <rooms>
+        <room>
+            <id>661</id>
+            <name>Room #661</name>
+            <average_age>6.6667</average_age>
+        </room>
+        <room>
+            <id>913</id>
+            <name>Room #913</name>
+            <average_age>14.3333</average_age>
+        </room>
+        <room>
+            <id>111</id>
+            <name>Room #111</name>
+            <average_age>26.3</average_age>
+        </room>
+        <room>
+            <id>957</id>
+            <name>Room #957</name>
+            <average_age>27.8889</average_age>
+        </room>
+        <room>
+            <id>773</id>
+            <name>Room #773</name>
+            <average_age>29.8182</average_age>
+        </room>
+    </rooms>
+</query_2>

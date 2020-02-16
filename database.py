@@ -1,18 +1,14 @@
 import pymysql
 
-from file_handlers import JSONHandler
 
-
-class Database:
+class HostelDatabase:
 
     def __init__(self, students_list, rooms_list):
-        self.json_handler = JSONHandler()
         self.students_list = students_list
         self.rooms_list = rooms_list
 
         self.database = pymysql.connect('localhost', 'tonystark', 'morgan3000', 'LX_TASK4')
         self.cursor = self.database.cursor()
-    #
 
     def create_students_table(self):
         students_table = """
@@ -21,7 +17,7 @@ class Database:
         NAME CHAR(40) NOT NULL,
         BIRTHDAY DATETIME,
         ROOM_ID INT,
-        SEX CHAR(1)
+        SEX CHAR(1) NOT NULL
         )"""
         self.cursor.execute(students_table)
         self.database.commit()
@@ -30,7 +26,7 @@ class Database:
         rooms_table = """
         CREATE TABLE IF NOT EXISTS ROOMS (
         ID INT primary key,
-        NAME CHAR(10)
+        NAME CHAR(10) NOT NULL
         )"""
         self.cursor.execute(rooms_table)
         self.database.commit()
@@ -60,78 +56,70 @@ class Database:
     def get_amount_of_students_in_room(self):  # 1
         aim = 'Get list of rooms with amount of students for each room'
         query = """
-        select rooms.id, rooms.name, count(students.id) as amount_of_students 
-        from rooms join students on rooms.id=students.room_id 
-        group by rooms.id 
-        order by rooms.id asc;
+        SELECT ROOMS.ID, ROOMS.NAME, COUNT(STUDENTS.ID) AS AMOUNT_OF_STUDENTS 
+        FROM ROOMS JOIN STUDENTS ON ROOMS.ID = STUDENTS.ROOM_ID 
+        GROUP BY ROOMS.ID 
+        ORDER BY ROOMS.ID ASC;
         """
         self.cursor.execute(query)
         data = self.cursor.fetchall()
-        print(data)
         rooms = [aim]
         for room in data:
             rooms.append({'id': room[0], 'name': room[1], 'students': room[2]})
-        print('Rooms list:', rooms, sep='\n')
         return rooms
 
-    def get_min_avg(self):  # 2
+    def get_students_average_age(self):  # 2
         aim = 'Get top-5 rooms where students have the youngest average age'
         query = """
-        select rooms.id, rooms.name, avg(age) as average_age 
-        from rooms join (
-        select students.id, TIMESTAMPDIFF(year,students.birthday,now()) as age, students.room_id as room_id 
-        from students
-        ) as age_table 
-        on rooms.id=age_table.room_id 
-        group by rooms.id 
-        order by average_age asc limit 5;
+        SELECT ROOMS.ID, ROOMS.NAME, AVG(AGE) AS AVERAGE_AGE 
+        FROM ROOMS JOIN (
+        SELECT STUDENTS.ID, TIMESTAMPDIFF(YEAR, STUDENTS.BIRTHDAY, NOW()) AS AGE, STUDENTS.ROOM_ID AS ROOM_ID 
+        FROM STUDENTS
+        ) AS AGE_TABLE 
+        ON ROOMS.ID = AGE_TABLE.ROOM_ID 
+        GROUP BY ROOMS.ID 
+        ORDER BY AVERAGE_AGE ASC LIMIT 5;
         """
         self.cursor.execute(query)
         data = self.cursor.fetchall()
-        print(data)
         rooms = [aim]
         for room in data:
             rooms.append({'id': room[0], 'name': room[1], 'average_age': float(room[2])})
-        print('Rooms list #2:', rooms, sep='\n')
         return rooms
 
     def get_largest_difference_in_stud_age(self):  # 3
         aim = 'Get top-5 rooms there students have the biggest age difference'
         query = """
-        select rooms.id, rooms.name, max(age)-min(age) as diff_age 
-        from rooms join (
-        select students.id, TIMESTAMPDIFF(year,students.birthday,now()) as age, students.room_id as room_id 
-        from students
-        ) as age_table on rooms.id=age_table.room_id 
-        group by rooms.id 
-        order by diff_age desc limit 5;
+        SELECT ROOMS.ID, ROOMS.NAME, MAX(AGE) - MIN(AGE) AS DIFF_AGE
+        FROM ROOMS JOIN ( 
+        SELECT STUDENTS.ID, TIMESTAMPDIFF(YEAR, STUDENTS.BIRTHDAY, NOW()) AS AGE, STUDENTS.ROOM_ID AS ROOM_ID 
+        FROM STUDENTS
+        ) AS AGE_TABLE ON ROOMS.ID = AGE_TABLE.ROOM_ID 
+        GROUP BY ROOMS.ID 
+        ORDER BY DIFF_AGE DESC LIMIT 5;
         """
         self.cursor.execute(query)
         data = self.cursor.fetchall()
-        print(data)
         rooms = [aim]
         for room in data:
             rooms.append({'id': room[0], 'name': room[1], 'age_difference': room[2]})
-        print('Rooms list #3:', rooms, sep='\n')
         return rooms
 
     def get_common_rooms(self):  # 4
         aim = 'Get rooms where women and men live together'
         query = """
-        select distinct women_rooms.id, women_rooms.name 
-        from (
-        select rooms.id as id, rooms.name as name from rooms join students on students.room_id=rooms.id where sex='F'
-        ) as women_rooms 
-        join (
-        select rooms.id as id from rooms join students on students.room_id=rooms.id where sex='M'
-        ) as men_rooms on men_rooms.id=women_rooms.id 
-        order by women_rooms.id asc;
+        SELECT DISTINCT WOMEN_ROOMS.ID, WOMEN_ROOMS.NAME 
+        FROM (
+        SELECT ROOMS.ID AS ID, ROOMS.NAME AS NAME FROM ROOMS JOIN STUDENTS ON STUDENTS.ROOM_ID = ROOMS.ID WHERE SEX='F'
+        ) AS WOMEN_ROOMS 
+        JOIN (
+        SELECT ROOMS.ID AS ID FROM ROOMS JOIN STUDENTS ON STUDENTS.ROOM_ID = ROOMS.ID WHERE SEX = 'M'
+        ) AS MEN_ROOMS ON MEN_ROOMS.ID = WOMEN_ROOMS.ID 
+        ORDER BY WOMEN_ROOMS.ID ASC;
         """
         self.cursor.execute(query)
         data = self.cursor.fetchall()
-        print(data)
         rooms = [aim]
         for room in data:
             rooms.append({'id': room[0], 'name': room[1]})
-        print('Rooms list #4:', rooms, sep='\n')
         return rooms

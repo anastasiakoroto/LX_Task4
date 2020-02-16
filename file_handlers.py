@@ -9,35 +9,15 @@ class JSONHandler:
             obj = json.load(json_file)
             return obj
 
-    def write_rooms_list_to_json(self, rooms_list, flag):
-        with open(f'output_files/json/rooms_{flag}.json', 'w') as json_file:
+    def write_rooms_list_to_json(self, rooms_list, filename):
+        with open(f'output_files/json/{filename}.json', 'w') as json_file:
             json.dump(rooms_list, json_file)
-        print(f'Updated list of rooms was added to output_files/json/updated_rooms_{flag}.json successfully!')
+        print(f'Updated list of rooms was added to output_files/json/{filename}.json successfully!')
 
 
 class XMLWriter:
 
-    # def _parse_rooms_to_xml_1(self, rooms_list):
-    #     root = ElemTree.Element('rooms')
-    #     for room_dict in rooms_list:
-    #         room = ElemTree.Element('room')
-    #         root.append(room)
-    #         room_id = ElemTree.SubElement(room, 'id')
-    #         room_id.text = str(room_dict.get('id'))
-    #         room_name = ElemTree.SubElement(room, 'name')
-    #         room_name.text = room_dict.get('name')
-    #         students_amount = ElemTree.SubElement(room, 'amount_of_students')
-    #         students_amount.text = str(room_dict.get('students'))
-    #     room_tree = ElemTree.ElementTree(root)
-    #     return room_tree
-    #
-    # def write_rooms_list_to_xml_1(self, rooms_list):
-    #     rooms_tree = self._parse_rooms_to_xml_1(rooms_list)
-    #     with open('output_files/xml/rooms_1', 'w') as xml_file:
-    #         rooms_tree.write(xml_file, encoding='unicode')
-    #     print('Updated list of rooms was added to output_files/xml/rooms_1.xml successfully!')
-
-    def _parse_rooms_to_xml_query_1(self, rooms_list):
+    def _parse_students_amount_query_to_xml(self, rooms_list):
         root = ElemTree.Element('query_1')
         goal = ElemTree.SubElement(root, 'goal')
         goal.text = rooms_list[0]
@@ -55,7 +35,7 @@ class XMLWriter:
         query_1_tree = ElemTree.ElementTree(root)
         return query_1_tree
 
-    def _parse_rooms_to_xml_query_2(self, rooms_list):
+    def _parse_average_age_query_to_xml(self, rooms_list):
         root = ElemTree.Element('query_2')
         goal = ElemTree.SubElement(root, 'goal')
         goal.text = rooms_list[0]
@@ -73,7 +53,7 @@ class XMLWriter:
         query_2_tree = ElemTree.ElementTree(root)
         return query_2_tree
 
-    def _parse_rooms_to_xml_query_3(self, rooms_list):
+    def _parse_age_difference_query_to_xml(self, rooms_list):
         root = ElemTree.Element('query_3')
         goal = ElemTree.SubElement(root, 'goal')
         goal.text = rooms_list[0]
@@ -91,7 +71,7 @@ class XMLWriter:
         query_3_tree = ElemTree.ElementTree(root)
         return query_3_tree
 
-    def _parse_rooms_to_xml_query_4(self, rooms_list):
+    def _parse_common_rooms_query_to_xml(self, rooms_list):
         root = ElemTree.Element('query_4')
         goal = ElemTree.SubElement(root, 'goal')
         goal.text = rooms_list[0]
@@ -107,41 +87,22 @@ class XMLWriter:
         query_4_tree = ElemTree.ElementTree(root)
         return query_4_tree
 
-    # def unite_queries(self, room_list_1, room_list_2, room_list_3, room_list_4):
-    #     root = ElemTree.Element('queries')
-    #     query_1_info = self._parse_rooms_to_xml_query_1(room_list_1)
-    #     query_2_info = self._parse_rooms_to_xml_query_2(room_list_2)
-    #     query_3_info = self._parse_rooms_to_xml_query_3(room_list_3)
-    #     query_4_info = self._parse_rooms_to_xml_query_4(room_list_4)
-    #     data = query_1_info.getroot()
-    #     root.append(query_1_info)
-    #     root.append(query_2_info)
-    #     root.append(query_3_info)
-    #     root.append(query_4_info)
-    #     queries_tree = ElemTree.ElementTree(root)
-    #     return queries_tree
-    #
-    # def write_queries_to_xml(self, room_list_1, room_list_2, room_list_3, room_list_4):
-    #     queries_tree = self.unite_queries(room_list_1, room_list_2, room_list_3, room_list_4)
-    #     with open('queries_result.xml', 'w') as xml_file:
-    #         queries_tree.write(xml_file, encoding='unicode')
-
-    def write_query_1_to_xml(self, room_list):
-        queries_tree = self._parse_rooms_to_xml_query_1(room_list)
-        with open('output_files/xml/query_1_result.xml', 'w') as xml_file:
+    def students_amount_query_to_xml(self, room_list, filename):
+        queries_tree = self._parse_students_amount_query_to_xml(room_list)
+        with open(f'output_files/xml/{filename}.xml', 'w') as xml_file:
             queries_tree.write(xml_file, encoding='unicode')
 
-    def write_query_2_to_xml(self, room_list):
-        queries_tree = self._parse_rooms_to_xml_query_2(room_list)
-        with open('output_files/xml/query_2_result.xml', 'w') as xml_file:
+    def average_age_query_to_xml(self, room_list, filename):
+        queries_tree = self._parse_average_age_query_to_xml(room_list)
+        with open(f'output_files/xml/{filename}.xml', 'w') as xml_file:
             queries_tree.write(xml_file, encoding='unicode')
 
-    def write_query_3_to_xml(self, room_list):
-        queries_tree = self._parse_rooms_to_xml_query_3(room_list)
-        with open('output_files/xml/query_3_result.xml', 'w') as xml_file:
+    def age_difference_query_to_xml(self, room_list, filename):
+        queries_tree = self._parse_age_difference_query_to_xml(room_list)
+        with open(f'output_files/xml/{filename}.xml', 'w') as xml_file:
             queries_tree.write(xml_file, encoding='unicode')
 
-    def write_query_4_to_xml(self, room_list):
-        queries_tree = self._parse_rooms_to_xml_query_4(room_list)
-        with open('output_files/xml/query_4_result.xml', 'w') as xml_file:
+    def common_rooms_query_to_xml(self, room_list, filename):
+        queries_tree = self._parse_common_rooms_query_to_xml(room_list)
+        with open(f'output_files/xml/{filename}.xml', 'w') as xml_file:
             queries_tree.write(xml_file, encoding='unicode')
