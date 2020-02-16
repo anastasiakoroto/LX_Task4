@@ -18,3 +18,8 @@ _Example:_
 $ python3 manager_db.py '/Users/BruceBanner/work/university/input_files/students.json'
 '/Users/BruceBanner/work/university/input_files/rooms.json' xml
 ```
+
+This program works with MySQL database, so **pay attention** that 
+before you run the program the database `LX_Task4` should be
+created on you computer (`username='tonystark', 
+password='morgan3000'`).

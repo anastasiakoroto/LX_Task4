@@ -7,28 +7,34 @@ class HostelDatabase:
         self.students_list = students_list
         self.rooms_list = rooms_list
 
-        self.database = pymysql.connect('localhost', 'tonystark', 'morgan3000', 'LX_TASK4')
+        self.database = pymysql.connect(host='localhost',
+                                        user='tonystark',
+                                        password='morgan3000',
+                                        db='LX_TASK4')
         self.cursor = self.database.cursor()
-
-    def create_students_table(self):
-        students_table = """
-        CREATE TABLE IF NOT EXISTS STUDENTS (
-        ID INT PRIMARY KEY,
-        NAME CHAR(40) NOT NULL,
-        BIRTHDAY DATETIME,
-        ROOM_ID INT,
-        SEX CHAR(1) NOT NULL
-        )"""
-        self.cursor.execute(students_table)
-        self.database.commit()
 
     def create_rooms_table(self):
         rooms_table = """
         CREATE TABLE IF NOT EXISTS ROOMS (
-        ID INT primary key,
-        NAME CHAR(10) NOT NULL
+        ID INT,
+        NAME CHAR(10) NOT NULL,
+        PRIMARY KEY (ID)
         )"""
         self.cursor.execute(rooms_table)
+        self.database.commit()
+
+    def create_students_table(self):
+        students_table = """
+        CREATE TABLE IF NOT EXISTS STUDENTS (
+        ID INT,
+        NAME CHAR(40) NOT NULL,
+        BIRTHDAY DATETIME,
+        ROOM_ID INT,
+        SEX CHAR(1) NOT NULL,
+        PRIMARY KEY (ID),
+        FOREIGN KEY (ROOM_ID) REFERENCES ROOMS (ID)
+        )"""
+        self.cursor.execute(students_table)
         self.database.commit()
 
     def fill_students_table(self):
