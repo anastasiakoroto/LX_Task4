@@ -48,7 +48,10 @@ class HostelDatabase:
             {student.get('room')}, 
             '{student.get('sex')}'
             )"""
-            self.cursor.execute(student_info_insertion)
+            try:
+                self.cursor.execute(student_info_insertion)
+            except pymysql.IntegrityError:
+                continue
         self.database.commit()
 
     def fill_rooms_table(self):
@@ -56,7 +59,10 @@ class HostelDatabase:
             room_info = f"""
             INSERT INTO ROOMS (ID, NAME)
             VALUES ({room.get('id')}, '{room.get('name')}')"""
-            self.cursor.execute(room_info)
+            try:
+                self.cursor.execute(room_info)
+            except pymysql.IntegrityError:
+                continue
         self.database.commit()
 
     def get_amount_of_students_in_room(self):  # 1
@@ -65,7 +71,6 @@ class HostelDatabase:
         SELECT ROOMS.ID, ROOMS.NAME, COUNT(STUDENTS.ID) AS AMOUNT_OF_STUDENTS 
         FROM ROOMS JOIN STUDENTS ON ROOMS.ID = STUDENTS.ROOM_ID 
         GROUP BY ROOMS.ID 
-        ORDER BY ROOMS.ID ASC;
         """
         self.cursor.execute(query)
         data = self.cursor.fetchall()
