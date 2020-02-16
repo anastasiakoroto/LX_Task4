@@ -24,6 +24,7 @@ class DatabaseManager:
 
     def run_queries(self):
         self.fill_database_by_rooms_students()
+        self.database.create_sex_index_to_students()
 
         students_amount_query = self.database.get_amount_of_students_in_room()
         average_age_query = self.database.get_students_average_age()

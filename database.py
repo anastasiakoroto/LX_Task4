@@ -65,6 +65,14 @@ class HostelDatabase:
                 continue
         self.database.commit()
 
+    def create_sex_index_to_students(self):
+        query = """CREATE INDEX SEX_INDEX ON STUDENTS(SEX)"""
+        try:
+            self.cursor.execute(query)
+        except pymysql.InternalError:
+            print("Index with name 'sex_index' already exists. New index wasn't created.")
+        self.database.commit()
+
     def get_amount_of_students_in_room(self):  # 1
         aim = 'Get list of rooms with amount of students for each room'
         query = """
