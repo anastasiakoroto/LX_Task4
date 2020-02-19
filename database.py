@@ -40,16 +40,19 @@ class HostelDatabase:
     def fill_students_table(self):
         for student in self.students_list:
             student_info_insertion = f"""
-            INSERT INTO STUDENTS (ID, NAME, BIRTHDAY, ROOM_ID, SEX)
-            VALUES (
-            {student.get('id')}, 
-            '{student.get('name')}', 
-            '{student.get('birthday')}', 
-            {student.get('room')}, 
-            '{student.get('sex')}'
-            )"""
+                        INSERT INTO STUDENTS (ID, NAME, BIRTHDAY, ROOM_ID, SEX)
+                        VALUES (
+                        {student.get('id')}, 
+                        %s, 
+                        %s, 
+                        {student.get('room')}, 
+                        %s
+                        )"""
             try:
-                self.cursor.execute(student_info_insertion)
+                self.cursor.execute(student_info_insertion,
+                                    (student.get('name'),
+                                    student.get('birthday'),
+                                    student.get('sex')))
             except pymysql.IntegrityError:
                 continue
         self.database.commit()
@@ -58,9 +61,9 @@ class HostelDatabase:
         for room in self.rooms_list:
             room_info = f"""
             INSERT INTO ROOMS (ID, NAME)
-            VALUES ({room.get('id')}, '{room.get('name')}')"""
+            VALUES ({room.get('id')}, %s)"""
             try:
-                self.cursor.execute(room_info)
+                self.cursor.execute(room_info, room.get('name'))
             except pymysql.IntegrityError:
                 continue
         self.database.commit()
