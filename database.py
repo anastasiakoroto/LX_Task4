@@ -42,17 +42,20 @@ class HostelDatabase:
             student_info_insertion = f"""
                         INSERT INTO STUDENTS (ID, NAME, BIRTHDAY, ROOM_ID, SEX)
                         VALUES (
-                        {student.get('id')}, 
                         %s, 
                         %s, 
-                        {student.get('room')}, 
+                        %s, 
+                        %s, 
                         %s
                         )"""
             try:
-                self.cursor.execute(student_info_insertion,
-                                    (student.get('name'),
-                                    student.get('birthday'),
-                                    student.get('sex')))
+                self.cursor.execute(student_info_insertion, (
+                    student.get('id'),
+                    student.get('name'),
+                    student.get('birthday'),
+                    student.get('room'),
+                    student.get('sex')
+                ))
             except pymysql.IntegrityError:
                 continue
         self.database.commit()
@@ -61,9 +64,9 @@ class HostelDatabase:
         for room in self.rooms_list:
             room_info = f"""
             INSERT INTO ROOMS (ID, NAME)
-            VALUES ({room.get('id')}, %s)"""
+            VALUES (%s, %s)"""
             try:
-                self.cursor.execute(room_info, room.get('name'))
+                self.cursor.execute(room_info, (room.get('id'), room.get('name')))
             except pymysql.IntegrityError:
                 continue
         self.database.commit()
@@ -93,14 +96,10 @@ class HostelDatabase:
     def get_students_average_age(self):  # 2
         aim = 'Get top-5 rooms where students have the youngest average age'
         query = """
-        SELECT ROOMS.ID, ROOMS.NAME, AVG(AGE) AS AVERAGE_AGE 
-        FROM ROOMS JOIN (
-        SELECT STUDENTS.ID, TIMESTAMPDIFF(YEAR, STUDENTS.BIRTHDAY, NOW()) AS AGE, STUDENTS.ROOM_ID AS ROOM_ID 
-        FROM STUDENTS
-        ) AS AGE_TABLE 
-        ON ROOMS.ID = AGE_TABLE.ROOM_ID 
+        SELECT ROOMS.ID, ROOMS.NAME, AVG(TIMESTAMPDIFF(YEAR, STUDENTS.BIRTHDAY, NOW())) AVERAGE_AGE 
+        FROM ROOMS JOIN STUDENTS ON ROOMS.ID = STUDENTS.ROOM_ID 
         GROUP BY ROOMS.ID 
-        ORDER BY AVERAGE_AGE ASC LIMIT 5;
+        ORDER BY AVERAGE_AGE LIMIT 5;
         """
         self.cursor.execute(query)
         data = self.cursor.fetchall()
@@ -112,12 +111,10 @@ class HostelDatabase:
     def get_largest_difference_in_stud_age(self):  # 3
         aim = 'Get top-5 rooms there students have the biggest age difference'
         query = """
-        SELECT ROOMS.ID, ROOMS.NAME, MAX(AGE) - MIN(AGE) AS DIFF_AGE
-        FROM ROOMS JOIN ( 
-        SELECT STUDENTS.ID, TIMESTAMPDIFF(YEAR, STUDENTS.BIRTHDAY, NOW()) AS AGE, STUDENTS.ROOM_ID AS ROOM_ID 
-        FROM STUDENTS
-        ) AS AGE_TABLE ON ROOMS.ID = AGE_TABLE.ROOM_ID 
-        GROUP BY ROOMS.ID 
+        SELECT ROOMS.ID, ROOMS.NAME, 
+        MAX(TIMESTAMPDIFF(YEAR, STUDENTS.BIRTHDAY, NOW())) - MIN(TIMESTAMPDIFF(YEAR, STUDENTS.BIRTHDAY, NOW())) DIFF_AGE 
+        FROM ROOMS JOIN STUDENTS ON ROOMS.ID = STUDENTS.ROOM_ID          
+        GROUP BY ROOMS.ID          
         ORDER BY DIFF_AGE DESC LIMIT 5;
         """
         self.cursor.execute(query)
@@ -130,14 +127,10 @@ class HostelDatabase:
     def get_common_rooms(self):  # 4
         aim = 'Get rooms where women and men live together'
         query = """
-        SELECT DISTINCT WOMEN_ROOMS.ID, WOMEN_ROOMS.NAME 
-        FROM (
-        SELECT ROOMS.ID AS ID, ROOMS.NAME AS NAME FROM ROOMS JOIN STUDENTS ON STUDENTS.ROOM_ID = ROOMS.ID WHERE SEX='F'
-        ) AS WOMEN_ROOMS 
-        JOIN (
-        SELECT ROOMS.ID AS ID FROM ROOMS JOIN STUDENTS ON STUDENTS.ROOM_ID = ROOMS.ID WHERE SEX = 'M'
-        ) AS MEN_ROOMS ON MEN_ROOMS.ID = WOMEN_ROOMS.ID 
-        ORDER BY WOMEN_ROOMS.ID ASC;
+        SELECT ROOMS.ID, ROOMS.NAME 
+        FROM ROOMS JOIN STUDENTS ON ROOMS.ID = STUDENTS.ROOM_ID 
+        GROUP BY ROOMS.ID 
+        HAVING COUNT(DISTINCT STUDENTS.SEX) > 1;
         """
         self.cursor.execute(query)
         data = self.cursor.fetchall()
