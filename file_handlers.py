@@ -2,9 +2,18 @@ import json
 import xml.etree.ElementTree as ElemTree
 
 
-class JSONHandler:
+class FileConverter:
+    def open_and_convert_to_object(self, path_to_file):
+        raise NotImplementedError
 
-    def convert_json_to_obj(self, path_to_file):
+
+class FileWriter:
+    def write(self, rooms_list, filename):
+        raise NotImplementedError
+
+
+class JSONConverter(FileConverter):
+    def open_and_convert_to_object(self, path_to_file):
         try:
             with open(path_to_file, 'r', encoding='utf-8') as json_file:
                 obj = json.load(json_file)
@@ -18,15 +27,16 @@ class JSONHandler:
         except PermissionError:
             raise PermissionError(f"Unfortunately, access to file with path {path_to_file} denied.")
 
-    def write_rooms_list_to_json(self, rooms_list, filename):
+
+class JSONWriter(FileWriter):
+    def write(self, rooms_list, filename):
         with open(f'output_files/json/{filename}.json', 'w') as json_file:
-            json.dump(rooms_list, json_file)
-        print(f'Updated list of rooms was added to output_files/json/{filename}.json successfully!')
+            json.dump(rooms_list[1:], json_file)
+        print(f'Result of query was added to output_files/json/{filename}.json successfully!')
 
 
-class XMLWriter:
-
-    def _parse_students_amount_query_to_xml(self, rooms_list):
+class XMLParser:
+    def parse_students_amount_query_to_xml(self, rooms_list):
         root = ElemTree.Element('query_1')
         goal = ElemTree.SubElement(root, 'goal')
         goal.text = rooms_list[0]
@@ -44,7 +54,7 @@ class XMLWriter:
         query_1_tree = ElemTree.ElementTree(root)
         return query_1_tree
 
-    def _parse_average_age_query_to_xml(self, rooms_list):
+    def parse_average_age_query_to_xml(self, rooms_list):
         root = ElemTree.Element('query_2')
         goal = ElemTree.SubElement(root, 'goal')
         goal.text = rooms_list[0]
@@ -62,7 +72,7 @@ class XMLWriter:
         query_2_tree = ElemTree.ElementTree(root)
         return query_2_tree
 
-    def _parse_age_difference_query_to_xml(self, rooms_list):
+    def parse_age_difference_query_to_xml(self, rooms_list):
         root = ElemTree.Element('query_3')
         goal = ElemTree.SubElement(root, 'goal')
         goal.text = rooms_list[0]
@@ -80,7 +90,7 @@ class XMLWriter:
         query_3_tree = ElemTree.ElementTree(root)
         return query_3_tree
 
-    def _parse_common_rooms_query_to_xml(self, rooms_list):
+    def parse_common_rooms_query_to_xml(self, rooms_list):
         root = ElemTree.Element('query_4')
         goal = ElemTree.SubElement(root, 'goal')
         goal.text = rooms_list[0]
@@ -96,22 +106,38 @@ class XMLWriter:
         query_4_tree = ElemTree.ElementTree(root)
         return query_4_tree
 
-    def students_amount_query_to_xml(self, room_list, filename):
-        queries_tree = self._parse_students_amount_query_to_xml(room_list)
-        with open(f'output_files/xml/{filename}.xml', 'w') as xml_file:
-            queries_tree.write(xml_file, encoding='unicode')
 
-    def average_age_query_to_xml(self, room_list, filename):
-        queries_tree = self._parse_average_age_query_to_xml(room_list)
-        with open(f'output_files/xml/{filename}.xml', 'w') as xml_file:
-            queries_tree.write(xml_file, encoding='unicode')
+class XMLWriter(FileWriter):
 
-    def age_difference_query_to_xml(self, room_list, filename):
-        queries_tree = self._parse_age_difference_query_to_xml(room_list)
-        with open(f'output_files/xml/{filename}.xml', 'w') as xml_file:
-            queries_tree.write(xml_file, encoding='unicode')
+    def __init__(self):
+        self.parser = XMLParser()
 
-    def common_rooms_query_to_xml(self, room_list, filename):
-        queries_tree = self._parse_common_rooms_query_to_xml(room_list)
+    def write(self, rooms_list, filename):
+        if filename[-1] == '1':
+            query_tree = self.parser.parse_students_amount_query_to_xml(rooms_list)
+        elif filename[-1] == '2':
+            query_tree = self.parser.parse_average_age_query_to_xml(rooms_list)
+        elif filename[-1] == '3':
+            query_tree = self.parser.parse_age_difference_query_to_xml(rooms_list)
+        else:
+            query_tree = self.parser.parse_common_rooms_query_to_xml(rooms_list)
         with open(f'output_files/xml/{filename}.xml', 'w') as xml_file:
-            queries_tree.write(xml_file, encoding='unicode')
+            query_tree.write(xml_file, encoding='unicode')
+            print(f'Result of query was added to output_files/xml/{filename}.json successfully!')
+
+
+class QueriesWriter:
+
+    def __init__(self, output_format):
+        self.json_writer = JSONWriter()
+        self.xml_writer = XMLWriter()
+        self.format = output_format
+
+    def write(self, rooms_list, filename):
+        if self.format == 'json':
+            self.json_writer.write(rooms_list, filename)
+        elif self.format == 'xml':
+            self.xml_writer.write(rooms_list, filename)
+        else:
+            print(f'There are no functionality for {self.format} format. Sorry :c\n'
+                  f'But you can choose json/xml c:')
